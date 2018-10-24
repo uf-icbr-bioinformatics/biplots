@@ -121,9 +121,9 @@ class DensityPlot(Plot):
         plt.savefig(self.outfile, format=self.imgformat)
 
     def usage(self):
-        sys.stdout.write("""density_scatterplot.py - Draw density scatterplots of paired data.
+        sys.stdout.write("""biplotter.py dscatt - Draw density scatterplots of paired data.
 
-Usage: density_scatterplot.py [options] datafile imgfile
+Usage: biplotter.py dscatt [options] datafile imgfile
 
 Read data from two columns of file `datafile' and draw a density heatmap
 of their scatterplot to `imgfile'. 
@@ -146,7 +146,7 @@ Graphical options:
   -f F  | Set output image format to F (default: {}).
 
 """.format(DensityPlot.cx, DensityPlot.cy, DensityPlot.skipRows, DensityPlot.xsize, DensityPlot.ysize, DensityPlot.pointSize, DensityPlot.imgformat))
-        return False
+        sys.exit(1)
 
 class MethylHist(Plot):
     infile = None
@@ -191,16 +191,56 @@ class MethylHist(Plot):
         ax.set_ylabel("% Sites")
         fig.savefig(self.outfile)
 
+    def usage(self):
+        sys.stdout.write("""biplotter.py mhist - Draw histogram of methylation data.
+
+Usage: biplotter.py mhist [options] datafile
+
+Read data from file `datafile' and draw a histogram.
+
+Options related to input data:
+
+- TODO
+
+Graphical options:
+
+- TODO
+
+""".format(MethylHist.infile))
+        sys.exit(1)
+
+
+def usage():
+    sys.stdout.write("""biplotter.py - command-line tool to generate a variety of useful plots
+    
+    Usage: biplotter.py [command] [command-specific_arguments]
+
+Available subcommands:
+    
+    dscatt
+    mhist
+
+    Ex. biplotter.py mhist -h
+
+""")
+
 ## Main    
 if __name__ == "__main__":
-    cmd = sys.argv[1]
-    args = sys.argv[2:]
+    try:
+        cmd = sys.argv[1]
+        args = sys.argv[2:]
+    except IndexError:
+        usage()
+        sys.exit(1)
     if cmd == "dscatt":
         P = DensityPlot()
     elif cmd == "mhist":
         P = MethylHist()
-        
-    if P.parseArgs(args):
-        P.run()
-    else:
-        P.usage()
+    try:    
+        if P.parseArgs(args):
+            P.run()
+        else:
+            P.usage()
+    except NameError:
+        usage()
+        sys.exit(1)
