@@ -121,9 +121,9 @@ class DensityPlot(Plot):
         plt.savefig(self.outfile, format=self.imgformat)
 
     def usage(self):
-        sys.stdout.write("""biplotter.py dscatt - Draw density scatterplots of paired data.
+        sys.stdout.write("""polyplotter.py dscatt - Draw density scatterplots of paired data.
 
-Usage: biplotter.py dscatt [options] datafile imgfile
+Usage: polyplotter.py dscatt [options] datafile imgfile
 
 Read data from two columns of file `datafile' and draw a density heatmap
 of their scatterplot to `imgfile'. 
@@ -192,9 +192,9 @@ class MethylHist(Plot):
         fig.savefig(self.outfile)
 
     def usage(self):
-        sys.stdout.write("""biplotter.py mhist - Draw histogram of methylation data.
+        sys.stdout.write("""polyplotter.py mhist - Draw histogram of methylation data.
 
-Usage: biplotter.py mhist [options] datafile
+Usage: polyplotter.py mhist [options] datafile
 
 Read data from file `datafile' and draw a histogram.
 
@@ -211,16 +211,16 @@ Graphical options:
 
 
 def usage():
-    sys.stdout.write("""biplotter.py - command-line tool to generate a variety of useful plots
+    sys.stdout.write("""polyplotter.py - command-line tool to generate a variety of useful plots
     
-    Usage: biplotter.py [command] [command-specific_arguments]
+    Usage: polyplotter.py [command] [command-specific_arguments]
 
 Available subcommands:
     
     dscatt
     mhist
 
-    Ex. biplotter.py mhist -h
+    Ex. polyplotter.py mhist -h
 
 """)
 

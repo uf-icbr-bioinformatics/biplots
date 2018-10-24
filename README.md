@@ -3,9 +3,9 @@ Command-line tool to generate useful plots
 
 ## Basic usage
 
-biplotter.py - command-line tool to generate a variety of useful plots
+polyplotter.py - command-line tool to generate a variety of useful plots
     
-    Usage: biplotter.py [command] [command-specific_arguments]
+    Usage: polyplotter.py [command] [command-specific_arguments]
 
 Available subcommands:
     
@@ -14,11 +14,11 @@ Available subcommands:
 
 ## Example
 
-biplotter.py dscatt -h
+polyplotter.py dscatt -h
     
-    biplotter.py dscatt - Draw density scatterplots of paired data.
+    polyplotter.py dscatt - Draw density scatterplots of paired data.
     
-    Usage: biplotter.py dscatt [options] datafile imgfile
+    Usage: polyplotter.py dscatt [options] datafile imgfile
     
     Read data from two columns of file `datafile' and draw a density heatmap
     of their scatterplot to `imgfile'. 
