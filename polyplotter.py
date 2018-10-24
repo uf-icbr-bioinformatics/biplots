@@ -113,7 +113,7 @@ class DensityPlot(Plot):
         if self.log:
             plt.xlim(xmin=min_x)
             plt.ylim(ymin=min_y)
-        diag_line, = ax.plot(ax.get_xlim(), ax.get_ylim(), ls="-", c=".3")
+        diag_line, = ax.plot(ax.get_xlim(), ax.get_ylim(), ls="-", c="0.3")
         if self.xlabel:
             plt.xlabel(self.xlabel)
         if self.ylabel:
@@ -209,6 +209,77 @@ Graphical options:
 """.format(MethylHist.infile))
         sys.exit(1)
 
+class BoxPlot(Plot):
+    infile = None
+    log = False
+    hasHeader = None
+    index_col = None
+    skipRows = None
+    pointSize = 50
+    cx = 4
+    cy = 3
+
+    def parseArgs():
+        if "-h" in args or "--help" in args:
+            return self.usage()
+        args = self.parseCommonArgs(args)
+        prev = ""
+        for a in args:
+            if self.infile == None:
+                self.infile = a
+        return (self.infile and self.outfile)
+
+    def run():
+        df = pd.read_csv(infile, index_col=index_col, header=hasHeader)
+        df = df.melt()
+        ax = sns.boxplot(x="variable", y="value", data=df)
+        if log:
+            ax.set_xscale("log")
+        plt.xlabel()
+        plt.ylabel()
+        plt.savefig(outfile)
+    def usage():
+        pass
+
+
+class SwarmPlot(Plot):
+    def parseArgs():
+        pass
+    def run():
+        pass
+    def usage():
+        pass
+
+   
+class BoxenPlot(Plot):
+    pass
+
+class ViolinPlot(Plot):
+    pass
+
+class JointPlot(Plot):
+    pass
+
+class HeatmapPlot(Plot):
+    pass
+
+class ClustermapPlot(Plot):
+    pass
+
+class ScatterPlot(Plot):
+    pass
+
+class KDEPlot(Plot):
+    pass
+
+class LinearModelPlot(Plot):
+    pass
+
+class LinePlot(Plot):
+    pass
+
+class BarPlot(Plot):
+    pass
 
 def usage():
     sys.stdout.write("""polyplotter.py - command-line tool to generate a variety of useful plots
