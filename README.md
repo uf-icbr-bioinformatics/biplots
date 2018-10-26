@@ -9,8 +9,9 @@ polyplotter.py - command-line tool to generate a variety of useful plots
 
 Available subcommands:
     
-    dscatt
-    mhist
+    dist    - Draw distribution plot ("box", "violin" or "boxen") for each column in data matrix
+    dscatt  - Draw density scatterplots of paired data
+    mhist   - Draw histogram of methylation data
 
 ## Example
 

@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import seaborn as sns
 from scipy.stats import gaussian_kde
 from Utils import CSVreader, Pathname
 
@@ -148,6 +149,7 @@ Graphical options:
 """.format(DensityPlot.cx, DensityPlot.cy, DensityPlot.skipRows, DensityPlot.xsize, DensityPlot.ysize, DensityPlot.pointSize, DensityPlot.imgformat))
         sys.exit(1)
 
+
 class MethylHist(Plot):
     infile = None
 
@@ -209,37 +211,90 @@ Graphical options:
 """.format(MethylHist.infile))
         sys.exit(1)
 
-class BoxPlot(Plot):
+class DistPlot(Plot):
     infile = None
     log = False
-    hasHeader = None
-    index_col = None
+    plot_type = None
     skipRows = None
     pointSize = 50
+    index_col = 0
     cx = 4
     cy = 3
 
-    def parseArgs():
+    def parseArgs(self, args):
         if "-h" in args or "--help" in args:
             return self.usage()
         args = self.parseCommonArgs(args)
         prev = ""
         for a in args:
-            if self.infile == None:
-                self.infile = a
+            if prev == "-i":
+                self.index_col = a
+                prev = ""
+            elif prev == "-p":
+                self.plot_type = a
+                prev = ""
+            elif a in ["-i","-p"]:
+                prev = a
+            if a == "-l":
+                self.log = np.log(2)
+            elif a == "-l10":
+                self.log = np.log(10)
+        if self.infile == None:
+            self.infile = a
+        if self.plot_type == None:
+            self.plot_type = "box"
         return (self.infile and self.outfile)
 
-    def run():
-        df = pd.read_csv(infile, index_col=index_col, header=hasHeader)
+
+    def run(self):
+        df = pd.read_table(self.infile, index_col=self.index_col)
+        sys.stderr.write("Data file read\n")
         df = df.melt()
-        ax = sns.boxplot(x="variable", y="value", data=df)
-        if log:
-            ax.set_xscale("log")
-        plt.xlabel()
-        plt.ylabel()
-        plt.savefig(outfile)
-    def usage():
-        pass
+        if self.log:
+            df.value = df["value"].apply(lambda x: np.log(x+1) / self.log)
+        if self.plot_type == "box":
+            ax = sns.boxplot(x="variable", y="value", data=df)
+        elif self.plot_type == "violin":
+            ax = sns.violinplot(x="variable", y="value", data=df)
+        elif self.plot_type == "boxen":
+            ax = sns.boxenplot(x="variable", y="value", data=df)
+        else:
+            sys.stderr.write("Invalid plot_type\n")
+            self.usage()
+        if self.title:
+            plt.title(self.title)
+        if self.xlabel:
+            plt.xlabel(self.xlabel)
+        if self.ylabel:
+            plt.ylabel(self.ylabel)
+        plt.savefig(self.outfile, format=self.imgformat)
+
+
+    def usage(self):
+        sys.stdout.write("""polyplotter.py distr - Draw distribution plot ("box", "violin" or "boxen") for each column in data matrix.
+
+Usage: polyplotter.py distr [options] datafile
+
+Read data from n x m matrix `datafile' and draw a boxplot for each column
+onto single plot.
+
+Options related to input data:
+
+    -l    | If supplied, log-scale values (base 2).
+    -l10  | If supplied, log-scale values (base 10).
+
+Graphical options:
+
+    -xs S | Set X dimension of image to S inches (default: {}).
+    -ys S | Set Y dimension of image to S inches (default: {}).
+    -xl L | Set X axis label to L.
+    -yl L | Set Y axis label to L.
+    -i N  | Set index column number to N. (default: {})
+    -p S  | Set plot type to S. (default: {})
+    -f F  | Set output image format to F (default: {}).
+
+""".format(DistPlot.xsize, DistPlot.ysize, DistPlot.index_col, DistPlot.plot_type, DistPlot.imgformat))
+        sys.exit(1)
 
 
 class SwarmPlot(Plot):
@@ -251,12 +306,6 @@ class SwarmPlot(Plot):
         pass
 
    
-class BoxenPlot(Plot):
-    pass
-
-class ViolinPlot(Plot):
-    pass
-
 class JointPlot(Plot):
     pass
 
@@ -281,7 +330,7 @@ class LinePlot(Plot):
 class BarPlot(Plot):
     pass
 
-def usage():
+def mainUsage():
     sys.stdout.write("""polyplotter.py - command-line tool to generate a variety of useful plots
     
     Usage: polyplotter.py [command] [command-specific_arguments]
@@ -290,6 +339,7 @@ Available subcommands:
     
     dscatt
     mhist
+    dist
 
     Ex. polyplotter.py mhist -h
 
@@ -301,17 +351,21 @@ if __name__ == "__main__":
         cmd = sys.argv[1]
         args = sys.argv[2:]
     except IndexError:
+        sys.stderr.write("Too few parameters\n")
         usage()
         sys.exit(1)
     if cmd == "dscatt":
         P = DensityPlot()
     elif cmd == "mhist":
         P = MethylHist()
+    elif cmd == "dist":
+        P = DistPlot()
     try:    
         if P.parseArgs(args):
             P.run()
         else:
             P.usage()
-    except NameError:
-        usage()
+    except NameError as error:
+        sys.stderr.write(error)
+        mainUsage()
         sys.exit(1)
