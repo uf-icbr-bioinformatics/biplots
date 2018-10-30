@@ -310,10 +310,64 @@ class JointPlot(Plot):
     pass
 
 class HeatmapPlot(Plot):
-    pass
+    infile = None
+    log = False
+    plot_type = None
+    skipRows = None
+    pointSize = 50
+    index_col = 0
+    cx = 4
+    cy = 3
+    
+    
+    def parseArgs(self, args):
+        pass
+    
 
-class ClustermapPlot(Plot):
-    pass
+    def run(self):
+        df = pd.read_table(self.infile, index_col=self.index_col)
+        sys.stderr.write("Data file read\n")
+        df = df.melt()
+        if self.log:
+            df.value = df["value"].apply(lambda x: np.log(x+1) / self.log)
+        if self.cluster:
+            ax = sns.clustermap(x="variable", y="value", data=df)
+        else:
+            ax = sns.heatmap(x="variable", y="value", data=df)
+        if self.title:
+            plt.title(self.title)
+        if self.xlabel:
+            plt.xlabel(self.xlabel)
+        if self.ylabel:
+            plt.ylabel(self.ylabel)
+        plt.savefig(self.outfile, format=self.imgformat)
+
+
+    def usage(self):
+        sys.stdout.write("""polyplotter.py heat - Draw heatmap
+
+Usage: polyplotter.py heat [options] datafile
+
+Read data from n x m matrix `datafile' and draw a heat map.
+
+Options related to input data:
+
+    -l    | If supplied, log-scale values (base 2).
+    -l10  | If supplied, log-scale values (base 10).
+
+Graphical options:
+
+    -xs S | Set X dimension of image to S inches (default: {}).
+    -ys S | Set Y dimension of image to S inches (default: {}).
+    -xl L | Set X axis label to L.
+    -yl L | Set Y axis label to L.
+    -i N  | Set index column number to N. (default: {})
+    -p S  | Set plot type to S. (default: {})
+    -f F  | Set output image format to F (default: {}).
+
+""".format(HeatmapPlot.xsize, HeatmapPlot.ysize, HeatmapPlot.index_col, HeatmapPlot.plot_type, HeatmapPlot.imgformat))
+        sys.exit(1)
+
 
 class ScatterPlot(Plot):
     pass
@@ -340,6 +394,7 @@ Available subcommands:
     dscatt
     mhist
     dist
+    heat  -- coming soon
 
     Ex. polyplotter.py mhist -h
 
@@ -352,7 +407,7 @@ if __name__ == "__main__":
         args = sys.argv[2:]
     except IndexError:
         sys.stderr.write("Too few parameters\n")
-        usage()
+        mainUsage()
         sys.exit(1)
     if cmd == "dscatt":
         P = DensityPlot()
@@ -360,6 +415,9 @@ if __name__ == "__main__":
         P = MethylHist()
     elif cmd == "dist":
         P = DistPlot()
+    else:
+        mainUsage()
+        sys.exit(1)
     try:    
         if P.parseArgs(args):
             P.run()
